@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for DevPulse Backend
+name: CI/CD Pipeline
 
 on:
   push:
@@ -8,8 +8,6 @@ on:
 
 env:
   DOTNET_VERSION: '10.0.x'
-  DOCKER_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/devpulse-backend
-  DOCKER_TAG: ${{ github.sha }}
 
 jobs:
   # ========================================
@@ -37,12 +35,12 @@ jobs:
         run: dotnet test DevPulse/DevPulse.slnx --no-build --configuration Release --verbosity normal
 
   # ========================================
-  # Job 2: Build Docker Image and Push to Docker Hub
+  # Job 2: Build and Push Docker Image (optional)
   # ========================================
   build-and-push-docker:
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.DOCKER_HUB_USERNAME != ''
 
     steps:
       - name: Checkout code
@@ -61,16 +59,16 @@ jobs:
           file: DevPulse/DevPulse.Api/Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
-            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/devpulse-backend:${{ github.sha }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/devpulse-backend:latest
 
   # ========================================
   # Job 3: Deploy to Server
   # ========================================
   deploy:
-    needs: build-and-push-docker
+    needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.SERVER_IP != ''
 
     steps:
       - name: Deploy to server via SSH
@@ -81,19 +79,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             echo "Deployment started..."
-
             cd /opt/myproject
-
-            # Pull the new image
-            docker pull ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
-
-            # Update the image tag in the production compose file
-            sed -i "s|image:.*devpulse-backend.*|image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}|g" docker-compose.prod.yml
-
-            # Restart the stack with the production config
-            docker compose -f docker-compose.prod.yml up -d
-
-            # Clean up old images
+            git pull origin main
+            docker compose up -d --build
             docker image prune -f
-
             echo "Deployment completed!"

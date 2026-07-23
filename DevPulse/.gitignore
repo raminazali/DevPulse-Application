@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Sensitive configuration files (public repo)
+DevPulse.Api/appsettings.json
+DevPulse.Api/appsettings.Development.json
