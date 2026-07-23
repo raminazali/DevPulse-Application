@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="DevPulse.Api/DevPulse.Api.csproj" />
+    <Project Path="DevPulse.Application/DevPulse.Application.csproj" />
+    <Project Path="DevPulse.Core/DevPulse.Core.csproj" />
+    <Project Path="DevPulse.Infrastructure/DevPulse.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="DevPulse.Api.Test/DevPulse.Api.Test.csproj" Id="1026ea63-388b-4026-bfa1-89d8d30ee495" />
+    <Project Path="DevPulse.Application.Test/DevPulse.Application.Test.csproj" Id="bf254c97-870c-4826-aaee-476b1a8b28b8" />
+    <Project Path="DevPulse.Core.Test/DevPulse.Core.Test.csproj" Id="62c3289d-79ad-4d8e-ba0f-9850ee75aad5" />
+    <Project Path="DevPulse.Infrastructure.Test/DevPulse.Infrastructure.Test.csproj" Id="1941687a-2225-47aa-9b06-ee63496c8cd3" />
+  </Folder>
+</Solution>

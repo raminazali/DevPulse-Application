@@ -1,0 +1,289 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: devpulse-light --default, devpulse-dark --prefersdark;
+}
+
+/* ─── Light theme ─────────────────────────────────────────────── */
+@plugin "daisyui/theme" {
+  name: "devpulse-light";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #ffffff;
+  --color-base-200: #f9fafb;
+  --color-base-300: #e5e7eb;
+  --color-base-content: #111827;
+
+  --color-primary: #4ade80;
+  --color-primary-content: #ffffff;
+
+  --color-secondary: #6b7280;
+  --color-secondary-content: #ffffff;
+
+  --color-accent: #22c55e;
+  --color-accent-content: #ffffff;
+
+  --color-neutral: #111827;
+  --color-neutral-content: #f9fafb;
+
+  --color-info: #6b7280;
+  --color-info-content: #ffffff;
+
+  --color-success: #4ade80;
+  --color-success-content: #052e16;
+
+  --color-warning: #9ca3af;
+  --color-warning-content: #111827;
+
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 0.75rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* ─── Dark theme ──────────────────────────────────────────────── */
+@plugin "daisyui/theme" {
+  name: "devpulse-dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #171717;
+  --color-base-200: #000000;
+  --color-base-300: #262626;
+  --color-base-content: #ffffff;
+
+  --color-primary: #4ade80;
+  --color-primary-content: #052e16;
+
+  --color-secondary: #9ca3af;
+  --color-secondary-content: #111827;
+
+  --color-accent: #22c55e;
+  --color-accent-content: #052e16;
+
+  --color-neutral: #262626;
+  --color-neutral-content: #f5f5f5;
+
+  --color-info: #9ca3af;
+  --color-info-content: #111827;
+
+  --color-success: #4ade80;
+  --color-success-content: #052e16;
+
+  --color-warning: #a3a3a3;
+  --color-warning-content: #111827;
+
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 0.75rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* ─── Design tokens (chrome: navbar + sidebar) ─────────────────── */
+:root,
+[data-theme="devpulse-light"] {
+  --chrome: #4ade80;
+  --chrome-hover: #22c55e;
+  --chrome-content: #ffffff;
+  --chrome-muted: rgb(255 255 255 / 0.7);
+  --chrome-hover-bg: rgb(255 255 255 / 0.12);
+  --menu-active-bg: #ffffff;
+  --menu-active-text: #16a34a;
+  --menu-active-border: transparent;
+  --menu-active-shadow: 0 4px 14px rgb(0 0 0 / 0.08);
+  --card-border: #e5e7eb;
+  --page-bg: #ffffff;
+  --muted-text: #6b7280;
+  --input-border: #d1d5db;
+  --table-hover: #f9fafb;
+}
+
+[data-theme="devpulse-dark"] {
+  --chrome: #4ade80;
+  --chrome-hover: #22c55e;
+  --chrome-content: #14532d;
+  --chrome-muted: rgb(6 78 59 / 0.75);
+  --chrome-hover-bg: rgb(0 0 0 / 0.1);
+  --menu-active-bg: #000000;
+  --menu-active-text: #ffffff;
+  --menu-active-border: #4ade80;
+  --menu-active-shadow: 0 4px 14px rgb(0 0 0 / 0.35);
+  --card-border: #262626;
+  --page-bg: #000000;
+  --muted-text: #9ca3af;
+  --input-border: #404040;
+  --table-hover: #1a1a1a;
+}
+
+/* ─── Global SaaS polish ──────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--page-bg);
+    color: var(--color-base-content);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-primary) 35%, transparent);
+  }
+}
+
+@layer components {
+  /* Cards */
+  .saas-card {
+    @apply rounded-2xl bg-base-100 p-6 transition-all duration-200;
+    border: 1px solid var(--card-border);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.04),
+      0 4px 16px rgb(0 0 0 / 0.04);
+  }
+
+  .saas-card-title {
+    @apply text-base font-semibold tracking-tight text-base-content;
+  }
+
+  .saas-card-subtitle {
+    @apply text-sm;
+    color: var(--muted-text);
+  }
+
+  /* Chrome (navbar / sidebar) */
+  .saas-chrome {
+    background-color: var(--chrome);
+    color: var(--chrome-content);
+  }
+
+.saas-chrome-icon {
+  color: var(--chrome-content) !important;
+  stroke: currentColor;
+}
+
+  .saas-chrome-muted {
+    color: var(--chrome-muted);
+  }
+
+  /* Primary button look */
+  .btn-saas {
+    @apply rounded-xl border-0 font-medium shadow-md transition-all duration-200;
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+
+  .btn-saas:hover {
+    background-color: var(--chrome-hover);
+    @apply scale-[1.02];
+  }
+
+  .btn-saas:active {
+    @apply scale-[0.98];
+  }
+
+  .btn-saas:disabled {
+    @apply scale-100 opacity-60;
+  }
+
+  /* Ghost on chrome */
+
+
+  /* Inputs */
+  .input-saas,
+  .select-saas,
+  .textarea-saas {
+    @apply w-full rounded-xl bg-base-100 transition-all duration-200;
+    border: 1px solid var(--input-border);
+  }
+
+  .input-saas:focus,
+  .select-saas:focus,
+  .textarea-saas:focus {
+    outline: 2px solid color-mix(in oklab, var(--color-primary) 70%, transparent);
+    outline-offset: 0;
+    border-color: var(--color-primary);
+  }
+
+  /* Page shell content */
+  .saas-page {
+    @apply space-y-6;
+  }
+
+  .saas-page-header {
+    @apply flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .saas-page-title {
+    @apply text-xl font-semibold tracking-tight text-base-content sm:text-2xl;
+  }
+
+  .saas-page-desc {
+    @apply text-sm;
+    color: var(--muted-text);
+  }
+
+  /* Tables */
+  .saas-table-wrap {
+    @apply overflow-hidden rounded-2xl bg-base-100;
+    border: 1px solid var(--card-border);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.04),
+      0 4px 16px rgb(0 0 0 / 0.04);
+  }
+
+  .saas-table {
+    @apply table w-full;
+  }
+
+  .saas-table thead {
+    @apply sticky top-0 z-10 bg-base-100;
+  }
+
+  .saas-table thead th {
+    @apply text-xs font-semibold uppercase tracking-wide;
+    color: var(--muted-text);
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .saas-table tbody tr {
+    @apply transition-colors duration-200;
+  }
+
+  .saas-table tbody tr:hover {
+    background-color: var(--table-hover);
+  }
+
+  .saas-table tbody td {
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  /* Soft badge */
+  .badge-saas {
+    @apply rounded-lg border-0 bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary;
+  }
+
+  .badge-saas-muted {
+    @apply rounded-lg border-0 px-2.5 py-1 text-xs font-medium;
+    background-color: color-mix(in oklab, var(--muted-text) 12%, transparent);
+    color: var(--muted-text);
+  }
+
+  .badge-saas-danger {
+    @apply rounded-lg border-0 bg-error/10 px-2.5 py-1 text-xs font-medium text-error;
+  }
+}
