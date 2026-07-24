@@ -7,10 +7,12 @@ on:
     branches: [main]
 
 env:
-  DOTNET_VERSION: '10.0.x'
+  DOTNET_VERSION: "10.0.x"
+  NODE_VERSION: "20"
 
 jobs:
-  build-and-test:
+  # ===================== Backend =====================
+  backend-build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,6 +23,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('DevPulse/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Restore
         run: dotnet restore DevPulse/DevPulse.slnx
 
@@ -30,8 +40,8 @@ jobs:
       - name: Test
         run: dotnet test DevPulse/DevPulse.slnx --no-build --configuration Release --verbosity normal
 
-  build-and-push-docker:
-    needs: build-and-test
+  backend-docker:
+    needs: backend-build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -57,7 +67,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push backend image
         if: steps.check_docker.outputs.available == 'true'
         uses: docker/build-push-action@v5
         with:
@@ -68,8 +78,73 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/devpulse-backend:${{ github.sha }}
             ${{ secrets.DOCKER_HUB_USERNAME }}/devpulse-backend:latest
 
+  # ===================== Frontend =====================
+  frontend-build-and-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: admin-panel/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: admin-panel
+
+      - name: Lint
+        run: npm run lint
+        working-directory: admin-panel
+
+      - name: Build
+        run: npm run build
+        working-directory: admin-panel
+
+  frontend-docker:
+    needs: frontend-build-and-lint
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Check Docker Hub secrets
+        id: check_docker
+        env:
+          USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        run: |
+          if [ -n "$USERNAME" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "DOCKER_HUB_USERNAME not set — skipping"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check_docker.outputs.available == 'true'
+
+      - name: Log in to Docker Hub
+        if: steps.check_docker.outputs.available == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push frontend image
+        if: steps.check_docker.outputs.available == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./admin-panel
+          file: admin-panel/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/devpulse-frontend:${{ github.sha }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/devpulse-frontend:latest
+
+  # ===================== Deploy =====================
   deploy:
-    needs: build-and-test
+    needs: [backend-docker, frontend-docker]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -94,8 +169,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             echo "Deployment started..."
-            cd /opt/myproject
+            cd /opt/partner
             git pull origin main
+            docker compose pull
             docker compose up -d --build
             docker image prune -f
             echo "Deployment completed!"
