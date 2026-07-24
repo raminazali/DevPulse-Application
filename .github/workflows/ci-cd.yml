@@ -43,32 +43,18 @@ jobs:
   backend-docker:
     needs: backend-build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Check Docker Hub secrets
-        id: check_docker
-        env:
-          USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-        run: |
-          if [ -n "$USERNAME" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "DOCKER_HUB_USERNAME not set — skipping"
-          fi
-
       - uses: actions/checkout@v4
-        if: steps.check_docker.outputs.available == 'true'
 
       - name: Log in to Docker Hub
-        if: steps.check_docker.outputs.available == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push backend image
-        if: steps.check_docker.outputs.available == 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./DevPulse
@@ -107,32 +93,18 @@ jobs:
   frontend-docker:
     needs: frontend-build-and-lint
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Check Docker Hub secrets
-        id: check_docker
-        env:
-          USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-        run: |
-          if [ -n "$USERNAME" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "DOCKER_HUB_USERNAME not set — skipping"
-          fi
-
       - uses: actions/checkout@v4
-        if: steps.check_docker.outputs.available == 'true'
 
       - name: Log in to Docker Hub
-        if: steps.check_docker.outputs.available == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push frontend image
-        if: steps.check_docker.outputs.available == 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./admin-panel
@@ -144,24 +116,12 @@ jobs:
 
   # ===================== Deploy =====================
   deploy:
-    needs: [backend-docker, frontend-docker]
+    needs: [backend-build-and-test, frontend-build-and-lint]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Check server secrets
-        id: check_server
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-        run: |
-          if [ -n "$SERVER_IP" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "SERVER_IP not set — skipping"
-          fi
-
       - name: Deploy to server via SSH
-        if: steps.check_server.outputs.available == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
