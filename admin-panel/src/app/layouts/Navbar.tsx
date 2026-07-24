@@ -1,4 +1,4 @@
-import { Bell, LogOutIcon, Menu, User, UserCircle } from "lucide-react";
+import { LogOutIcon, Menu, User, UserCircle } from "lucide-react";
 import ThemeToggle from "../../shared/utils/ThemeToggle";
 import { useAuth } from "../../shared/hooks/useAuth";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -67,17 +67,6 @@ export default function Navbar() {
 
       {/* Actions */}
       <div className="ms-auto flex items-center gap-2">
-        {/* Notifications */}
-        <button
-          type="button"
-          aria-label="اعلان‌ها"
-          className="relative flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200 hover:bg-white/15 active:scale-95 dark:hover:bg-black/10"
-        >
-          <Bell size={19} className="text-white dark:text-[#14532d]" />
-
-          <span className="absolute top-2 left-2 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#4ade80]" />
-        </button>
-
         {/* Theme */}
         <div className="flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200 hover:bg-white/15 dark:hover:bg-black/10">
           <ThemeToggle chrome={true} />

@@ -33,6 +33,7 @@ export function FormAsyncSelect<T extends FieldValues>({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -71,13 +72,18 @@ export function FormAsyncSelect<T extends FieldValues>({
 
   const selectedUser = users.find((u) => u.id === selectedId);
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (id: string, fullName: string) => {
+    setSelectedLabel(fullName);
     setValue(name, id as PathValue<T, Path<T>>, {
       shouldValidate: true,
       shouldDirty: true,
     });
     setOpen(false);
   };
+
+  const displayLabel = selectedId
+    ? (selectedLabel ?? selectedUser?.fullName ?? "کاربر انتخاب‌شده")
+    : null;
 
   return (
     <div className="relative space-y-1.5" ref={containerRef}>
@@ -95,8 +101,7 @@ export function FormAsyncSelect<T extends FieldValues>({
         onClick={() => setOpen((p) => !p)}
       >
         <span className="truncate">
-          {selectedUser?.fullName ??
-            (selectedId ? "کاربر انتخاب‌شده" : placeholder)}
+          {displayLabel ?? placeholder}
         </span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 opacity-50 transition-transform duration-200 ${
@@ -137,7 +142,7 @@ export function FormAsyncSelect<T extends FieldValues>({
                   className={`w-full rounded-xl p-2.5 text-start transition-all duration-200 hover:bg-primary/10 ${
                     selectedId === user.id ? "bg-primary/15" : ""
                   }`}
-                  onClick={() => handleSelect(user.id)}
+                  onClick={() => handleSelect(user.id, user.fullName)}
                 >
                   <span className="block text-sm font-medium">
                     {user.fullName}
