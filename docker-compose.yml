@@ -39,7 +39,7 @@ services:
       args:
         VITE_API_URL: /api
     ports:
-      - "80:80"  # <--- این خط را از 3000:80 به 80:80 تغییر دهید
+      - "80:80"
     depends_on:
       - api
     restart: unless-stopped
